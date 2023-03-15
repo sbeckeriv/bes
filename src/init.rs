@@ -1,28 +1,23 @@
 use crate::{
-    config::{default_config_path, default_database_path},
-    InitArgs,
+    config::{self, default_config_path, default_database_path},
+    ConfigArgs,
 };
 use std::{
     fs::{self, File},
     io::{self, Write},
-    path::PathBuf,
-    str::FromStr,
 };
-pub async fn init(args: InitArgs) -> io::Result<()> {
+
+pub async fn init(args: ConfigArgs) -> io::Result<()> {
     let config_file = args.config_file.unwrap_or_else(default_config_path);
 
-    let account_file = args.account_file.unwrap_or_else(|| {
-        dirs::home_dir()
-            .unwrap_or_else(|| PathBuf::from_str(".").expect("no home dir path buff issues"))
-            .join(".config")
-            .join("bes")
-            .join("account-default.toml")
-    });
+    let account_file = args
+        .account_file
+        .unwrap_or_else(|| config::default_account_path());
 
     let database_file = args
         .database_file
         .unwrap_or_else(|| dirs::home_dir().unwrap_or_else(default_database_path));
-    let database_password = &args.database_password;
+    let database_password = &args.password;
     //pop file names
     let mut config_dir = config_file.clone();
     config_dir.pop();

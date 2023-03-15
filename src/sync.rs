@@ -1,12 +1,16 @@
 use chrono::{DateTime, Utc};
 
 use crate::{
-    config,
+    config::{self, DatabaseConfig},
     database::{message_to_db, save_records},
     messages::{self, MessageFilter},
 };
 
-pub async fn sync_count(count: u32, account_names: Option<Vec<String>>) -> Result<u32, String> {
+pub async fn sync_count(
+    database_config: &DatabaseConfig,
+    count: u32,
+    account_names: Option<Vec<String>>,
+) -> Result<u32, String> {
     let accounts = config::get_accounts(config::default_config_path());
     let accounts = if let Some(filter) = account_names {
         accounts
@@ -29,7 +33,7 @@ pub async fn sync_count(count: u32, account_names: Option<Vec<String>>) -> Resul
 
         for message in messages.to_vec().into_iter() {
             if let Some((raw, record)) = message_to_db(&message, &account) {
-                save_records(raw, record).map_err(|e| format!("{:?}", e))?;
+                save_records(database_config, raw, record).map_err(|e| format!("{:?}", e))?;
             }
         }
     }

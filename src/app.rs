@@ -1,6 +1,6 @@
 use crate::{
     components::{email::Email, utils::*},
-    config::AccountConfig,
+    config::{AccountConfig, DatabaseConfig},
     database,
     messages::parse_emails,
 };
@@ -14,22 +14,27 @@ use tokio::runtime::Handle;
 // filter img src urls https://github.com/rust-ammonia/ammonia/issues/175 ?
 
 pub fn App(cx: Scope<AppProps>) -> Element {
-    let config: &UseState<Option<Config>> = {
-        let initial = cx.props.config.take();
+    let account_config: &UseState<Option<_>> = {
+        let initial = cx.props.account_config.take();
         use_state(&cx, || initial)
     };
 
-    let filter: &UseState<Option<ViewFilter>> = {
+    let database_config: &UseState<Option<_>> = {
+        let initial = cx.props.database_config.take();
+        use_state(&cx, || initial)
+    };
+
+    let filter: &UseState<Option<_>> = {
         let initial = cx.props.view_filter.take();
         use_state(&cx, || initial)
     };
 
     // state! why a state? login/setup/config process. inspired by twitvault
-    let view = match (filter.get(), config.get()) {
-        (Some(filter), Some(config)) => cx.render(rsx! { EmailContent {
-            config: config.clone(), filter: filter.clone()
+    let view = match (filter.get(), account_config.get(), database_config.get()) {
+        (Some(filter), Some(account_config), Some(database_config)) => cx.render(rsx! { EmailContent {
+            account_config: account_config.clone(), filter: filter.clone(), database_config: database_config.clone()
         }}),
-        (_, _) => {
+        (_, _,_) => {
             cx.render(rsx! {
                 span {
                     "none state"
@@ -50,7 +55,8 @@ pub fn App(cx: Scope<AppProps>) -> Element {
 }
 
 pub struct AppProps {
-    pub config: Cell<Option<Config>>,
+    pub account_config: Cell<Option<AccountConfig>>,
+    pub database_config: Cell<Option<DatabaseConfig>>,
     pub view_filter: Cell<Option<ViewFilter>>,
 }
 
@@ -84,11 +90,19 @@ fn Header(cx: Scope<HeaderProps>) -> Element {
         }
     })
 }
-
+pub struct AccountConfigState(pub AccountConfig);
+pub struct DatabaseConfigState(pub DatabaseConfig);
 #[inline_props]
-async fn EmailContent(cx: Scope, config: Config, filter: ViewFilter) -> Element {
+async fn EmailContent(
+    cx: Scope,
+    account_config: AccountConfig,
+    filter: ViewFilter,
+    database_config: DatabaseConfig,
+) -> Element {
+    use_shared_state_provider(cx, || AccountConfigState(account_config.clone()));
+    use_shared_state_provider(cx, || DatabaseConfigState(database_config.clone()));
     //todo: dont load email body till clicked.
-    let groups = database::list_threads().unwrap_or_default();
+    let groups = database::list_threads(&database_config).unwrap_or_default();
 
     let mut list = vec![];
     for (key, group) in &groups
@@ -166,6 +180,7 @@ fn EmailGroup(cx: Scope, group: EmailGroup) -> Element {
                class: "email-thread-name",
                "{group.name}"
             }
+        }
         if *expanded.get(){
         rsx!(div {
             class: "email-thread-content",
@@ -176,7 +191,7 @@ fn EmailGroup(cx: Scope, group: EmailGroup) -> Element {
                     EmailThread{ thread: email_thread}
                 }
             }
-        })}
+        })
 
 
         }

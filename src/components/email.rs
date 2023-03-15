@@ -1,4 +1,4 @@
-use crate::{components::utils::*, database, messages::parse_emails};
+use crate::{app::DatabaseConfigState, components::utils::*, database, messages::parse_emails};
 use dioxus::prelude::*;
 
 #[derive(PartialEq, Clone)]
@@ -19,6 +19,8 @@ pub struct Email {
 
 #[inline_props]
 pub fn Email(cx: Scope, email: Email) -> Element {
+    let database_config = use_shared_state::<DatabaseConfigState>(cx).unwrap();
+    let database_config = &database_config.read().0;
     let expanded = use_state(&cx, || false);
     let hovered = use_state(&cx, || false);
     let background_hover = if *hovered.get() {
@@ -39,7 +41,8 @@ pub fn Email(cx: Scope, email: Email) -> Element {
         .collect::<Vec<_>>()
         .join(", ");
     if *expanded.get() {
-        let content = database::get_message_id_content(&email.message_id).unwrap_or_default();
+        let content = database::get_message_id_content(database_config, &email.message_id)
+            .unwrap_or_default();
         // move style tags inside tags
         let inliner = css_inline::CSSInliner::options()
             .load_remote_stylesheets(false)
@@ -58,6 +61,7 @@ pub fn Email(cx: Scope, email: Email) -> Element {
 
         cx.render(rsx! {
             div {
+                key: "{email.message_id}",
                 class: "email-expanded", style: "width: 100%;  ",
                 div {
                     class: "email-expaned-header",

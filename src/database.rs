@@ -1,3 +1,4 @@
+use crate::config::DatabaseConfig;
 use crate::models::Message;
 use crate::models::MessageLite;
 use crate::models::RawMessage;
@@ -24,7 +25,7 @@ fn run_migration(conn: &mut SqliteConnection) {
 
 pub fn establish_connection(config: Option<(&str, &Option<String>)>) -> SqliteConnection {
     let configs = config.map(|c| (c.0.to_string(), c.1)).unwrap_or_else(|| {
-        let db_config = get_database(None);
+        let db_config = get_database(&None);
         (db_config.path.clone(), &None)
     });
 
@@ -35,8 +36,11 @@ pub fn establish_connection(config: Option<(&str, &Option<String>)>) -> SqliteCo
     conn
 }
 
-pub fn debug_message(args: DebugMessageArgs) {
-    let mut conn = establish_connection(None);
+pub fn debug_message(database_config: &DatabaseConfig, args: DebugMessageArgs) {
+    let mut conn = establish_connection(Some((
+        database_config.path.clone().as_str(),
+        &database_config.password.clone(),
+    )));
     let messages = messages::dsl::messages
         .filter(messages::message_id.eq(args.message_id.clone()))
         .load::<Message>(&mut conn)
@@ -54,8 +58,11 @@ pub fn debug_message(args: DebugMessageArgs) {
     dbg!(&parsed.get_headers(), &parsed.get_body(),);
 }
 
-pub fn list_threads() -> Result<Vec<Message>, String> {
-    let mut conn = establish_connection(None);
+pub fn list_threads(database_config: &DatabaseConfig) -> Result<Vec<Message>, String> {
+    let mut conn = establish_connection(Some((
+        database_config.path.clone().as_str(),
+        &database_config.password.clone(),
+    )));
     let messages = messages::dsl::messages
         .select((
             messages::id,
@@ -84,8 +91,14 @@ pub fn list_threads() -> Result<Vec<Message>, String> {
 }
 
 // (text, html)
-pub fn get_message_id_content(message_id: &str) -> Option<(String, String)> {
-    let mut conn = establish_connection(None);
+pub fn get_message_id_content(
+    database_config: &DatabaseConfig,
+    message_id: &str,
+) -> Option<(String, String)> {
+    let mut conn = establish_connection(Some((
+        database_config.path.clone().as_str(),
+        &database_config.password.clone(),
+    )));
     let messages = messages::dsl::messages
         .filter(messages::message_id.eq(message_id))
         .order(messages::sent_date.desc())
@@ -99,8 +112,15 @@ pub fn get_message_id_content(message_id: &str) -> Option<(String, String)> {
     })
 }
 
-pub fn save_records(raw: RawMessage, record: Message) -> Result<(), String> {
-    let mut conn = establish_connection(None);
+pub fn save_records(
+    database_config: &DatabaseConfig,
+    raw: RawMessage,
+    record: Message,
+) -> Result<(), String> {
+    let mut conn = establish_connection(Some((
+        database_config.path.clone().as_str(),
+        &database_config.password.clone(),
+    )));
     diesel::insert_into(messages::table)
         .values(&record)
         .execute(&mut conn)

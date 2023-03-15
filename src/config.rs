@@ -4,6 +4,14 @@ use std::fs;
 use std::{path::PathBuf, str::FromStr};
 use toml::{self, Table};
 
+pub fn default_account_path() -> PathBuf {
+    dirs::home_dir()
+        .unwrap_or_else(|| PathBuf::from_str(".").expect("no home dir path buff issues"))
+        .join(".config")
+        .join("bes")
+        .join("account-default.toml")
+}
+
 pub fn default_config_path() -> PathBuf {
     dirs::home_dir()
         .unwrap_or_else(|| PathBuf::from_str(".").expect("no home dir path buff issues"))
@@ -41,6 +49,7 @@ impl AccountConfig {
             host: self.imap.host.clone(),
             port: self.imap.port as u16,
             starttls: Some(false),
+            //insecure: Some(true),
             login: self.imap.login.clone(),
             passwd_cmd: self
                 .imap
@@ -59,6 +68,7 @@ impl AccountConfig {
                 })
                 .unwrap(),
             ssl: Some(true),
+            // ssl: Some(false),
             ..Default::default()
         };
         let backend_config = BackendConfig::Imap(imap_config);
@@ -121,8 +131,11 @@ fn default_sender() -> String {
     "None".into()
 }
 
-pub fn get_database(config_file: Option<PathBuf>) -> DatabaseConfig {
-    let config_file = config_file.unwrap_or_else(|| default_config_path());
+pub fn get_database(config_file: &Option<PathBuf>) -> DatabaseConfig {
+    let config_file = config_file
+        .as_ref()
+        .cloned()
+        .unwrap_or_else(|| default_config_path());
     let contents = match fs::read_to_string(config_file) {
         Ok(c) => c,
         Err(_) => {
@@ -151,6 +164,7 @@ pub fn get_database(config_file: Option<PathBuf>) -> DatabaseConfig {
 }
 
 pub fn get_accounts(config_file: PathBuf) -> Vec<AccountConfig> {
+    dbg!(&config_file);
     let contents = match fs::read_to_string(config_file) {
         Ok(c) => c,
         Err(_) => {
