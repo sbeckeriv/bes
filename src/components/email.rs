@@ -1,5 +1,8 @@
 use crate::{app::DatabaseConfigState, components::utils::*, database, messages::parse_emails};
 use dioxus::prelude::*;
+pub use dioxus_tailwindcss;
+pub use dioxus_tailwindcss::build;
+pub use dioxus_tailwindcss::prelude::*;
 
 #[derive(PartialEq, Clone)]
 pub struct Email {
@@ -62,13 +65,11 @@ pub fn Email(cx: Scope, email: Email) -> Element {
         cx.render(rsx! {
             div {
                 key: "{email.message_id}",
-                class: "email-expanded", style: "width: 100%;  ",
+                class: class!(w_full),
                 div {
-                    class: "email-expaned-header",
-                    style: "display: flex;column-gap: 20px; background-color: #999;",
-
+                    class: class!(flex gap_20 bg_gray_500),
                     div{
-                        style: "display: flex; column-gap: 15px; flex-grow: 1; column-count: 3;",
+                        class: class!(flex gap_16 grow),
                         onclick:  move |_| {
                             expanded.set(false);
                             //you clicked it you should be hovering over it!
@@ -84,7 +85,7 @@ pub fn Email(cx: Scope, email: Email) -> Element {
                         }
 
                         div{
-                            class: "email-expaned-date", style: "flex-grow: 1; text-align: right;",
+                            class: class!(grow text_right),
                             "{date_format(&email.date_sent)}"
                         }
                     }
@@ -125,40 +126,41 @@ pub fn Email(cx: Scope, email: Email) -> Element {
 
         cx.render(rsx! {
             div {
-                class: "email-expanded", style: "width: 100%; padding-bottom:10px",
+                class: class!(w_full border_t border_t_gray_200 ),
                 div {
-                    class: "email-expaned-header",
-                    style: "display: flex; min-height: 30px; column-gap: 20px; {background_hover}",
+                    // class: class!() "email-expaned-header flex gap-20",
                     onmouseenter: move |_| {hovered.set(true)},
                     onmouseleave: move |_| {hovered.set(false)},
                     div{
-                        style: "display: flex; column-gap: 15px ;flex-grow: 1; column-count: 4;",
+                        class: class!(flex justify_between px_3 py_2 grow gap_5 hover(bg_slate_200)),
                         onclick:  move |_| {
                             hovered.set(false);
                             expanded.set(true);
                         },
                         div{
-                            class: "email-expanded-user-icon circle",
+                            style: "width: 32px;",
                             "{icon}"
                         }
                         div{
-                            class: "email-expaned-from",
+                            class: class!(w_3__12 overflow_hidden text_ellipsis whitespace_nowrap),
                             "{from}"
                         }
 
                         div{
-                            class: "email-expaned-subject", style: "overflow: hidden; text-overflow: ellipsis; ",
+                            class: "email-expaned-subject",
+                            class: class!(w_full grow overflow_hidden text_ellipsis whitespace_nowrap),
                             "{email.subject}"
                         }
 
                         div{
-                            class: "email-expaned-date", style: "flex-grow: 1; text-align: right;",
+                            class: class!(w_2__12 text_right overflow_hidden whitespace_nowrap),
                             "{date}"
                         }
-                    }
-                    div{
-                        class: "email-expaned-actions",
-                        "☰"
+
+                        div {
+                            class: class!(shrink),
+                            "☰"
+                        }
                     }
                 }
             }

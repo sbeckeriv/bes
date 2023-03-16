@@ -192,7 +192,9 @@ async fn main() {
                     account_config: Cell::new(Some(account_config)),
                     database_config: Cell::new(Some(database_config)),
                 },
-                Config::default().with_icon(icon),
+                Config::default().with_icon(icon).with_custom_head(
+                    "<script src=\"https://cdn.tailwindcss.com\"></script>".to_string(),
+                ),
             );
         }
     }

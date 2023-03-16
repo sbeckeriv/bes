@@ -45,4 +45,6 @@ dioxus-hot-reload = "0.1.1"
 ammonia = "*"
 css-inline = "*"
 image = "*"                                       # generate icon
+dioxus-class = "*"
 dioxus-daisyui = "*"
+dioxus-tailwindcss = "*"
