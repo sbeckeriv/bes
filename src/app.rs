@@ -169,6 +169,7 @@ async fn EmailContent(
 
     cx.render(rsx!(
         div {
+            class: class!(text_slate_600),
             for view in views.iter(){
                 div{
                     class: "email-group",
@@ -195,28 +196,28 @@ fn EmailGroup(cx: Scope, group: EmailGroup) -> Element {
     let expanded = use_state(&cx, || true);
     cx.render(rsx! {
         div {
-            class: "email-thread-item",
-            onclick:  move |_| {
-                expanded.set(expanded.get()^true);
-            },
-            div{
-               class: "email-thread-name",
-               "{group.name}"
-            }
-        }
-        if *expanded.get(){
-        rsx!(div {
-            class: "email-thread-content",
-            style: "display: grid; grid-template-columns: 1fr; gap: .1em;",
-            for email_thread in group.children.to_owned().into_iter(){
+            class: class!(mb_5),
+            div {
+                class: class!(uppercase px_3 py_2 w_full text_sm text_sky_600 border_b border_b_slate_200),
+                onclick:  move |_| {
+                    expanded.set(expanded.get()^true);
+                },
                 div{
-                    class: "email-thread",
-                    EmailThread{ thread: email_thread}
+                    class: "email-thread-name",
+                    "{group.name}"
                 }
             }
-        })
-
-
+            if *expanded.get(){
+                rsx!(div {
+                    class: class!(flex flex_col),
+                    for email_thread in group.children.to_owned().into_iter(){
+                        div{
+                            class: "email-thread",
+                            EmailThread{ thread: email_thread}
+                        }
+                    }
+                })
+            }
         }
     })
 }
