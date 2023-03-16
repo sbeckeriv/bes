@@ -7,6 +7,7 @@ use crate::{
 
 use chrono::{DateTime, Local, Utc};
 use dioxus::prelude::*;
+use dioxus_daisyui::prelude::*;
 use itertools::Itertools;
 use std::{cell::Cell, collections::HashSet, ops::BitXorAssign};
 use tokio::runtime::Handle;
@@ -31,10 +32,13 @@ pub fn App(cx: Scope<AppProps>) -> Element {
 
     // state! why a state? login/setup/config process. inspired by twitvault
     let view = match (filter.get(), account_config.get(), database_config.get()) {
-        (Some(filter), Some(account_config), Some(database_config)) => cx.render(rsx! { EmailContent {
+        (Some(filter), Some(account_config), Some(database_config)) => {
+            use_shared_state_provider(cx, || ViewFilterState(filter.clone()));
+            cx.render(rsx! { EmailContent {
             account_config: account_config.clone(), filter: filter.clone(), database_config: database_config.clone()
-        }}),
-        (_, _,_) => {
+        }})
+        }
+        (_, _, _) => {
             cx.render(rsx! {
                 span {
                     "none state"
@@ -78,20 +82,37 @@ pub struct Config {
 
 #[derive(PartialEq, Props)]
 struct HeaderProps {
-    #[props(optional)]
-    search: Option<String>,
     pinned: bool,
 }
 
 fn Header(cx: Scope<HeaderProps>) -> Element {
+    let mut view_filter_state = use_shared_state::<ViewFilterState>(cx).unwrap();
+    let view_filter = &view_filter_state.read().0;
+    let search_text = use_state(&cx, || view_filter.query.clone());
+    let pinned = use_state(&cx, || view_filter.pinned.clone());
     cx.render(rsx! {
-        div {
-            "Header",
+        div{
+        input {
+            r#type: "text",
+            class: class!(w_80 h_12 text_2xl m_4 px_2 input input_primary input_bordered),
+            placeholder: "Type to search",
+            oninput: move | evt | {
+                let text =  evt.value.clone();
+                if text.len()>0{
+                    view_filter_state.write().0.query = Some(text.clone());
+                    search_text.set(Some(text));
+                }else{
+                    view_filter_state.write().0.query = None;
+                    search_text.set(None);
+                }
+            }
         }
+    }
     })
 }
 pub struct AccountConfigState(pub AccountConfig);
 pub struct DatabaseConfigState(pub DatabaseConfig);
+pub struct ViewFilterState(pub ViewFilter);
 #[inline_props]
 async fn EmailContent(
     cx: Scope,
@@ -101,7 +122,9 @@ async fn EmailContent(
 ) -> Element {
     use_shared_state_provider(cx, || AccountConfigState(account_config.clone()));
     use_shared_state_provider(cx, || DatabaseConfigState(database_config.clone()));
-    //todo: dont load email body till clicked.
+
+    let mut view_filter_state = use_shared_state::<ViewFilterState>(cx).unwrap();
+    let view_filter = &view_filter_state.read().0;
     let groups = database::list_threads(&database_config).unwrap_or_default();
 
     let mut list = vec![];

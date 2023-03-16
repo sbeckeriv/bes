@@ -1,0 +1,59 @@
+# BES
+
+## About
+An email system inspired by Google Inbox. Pin, archive and snooze your email to reach 0 Inbox. 
+Built on the back of Sqlite, https://lib.rs/crates/himalaya-lib, https://dioxuslabs.com/
+
+## Demo
+<insert image>
+todo: generate demo.sqlite
+
+```
+cargo run -- run -d demo.sqlite
+```
+
+## Config
+
+### config.toml
+```
+accounts = ["/home/me/.config/bes_demo/account-default.toml"]
+[database]
+path = "/home/me/.config/bes_demo/emails.db"
+password_used = false   
+```
+
+### account-default.toml
+You need to get an imap password from gmail for the moment. 
+```
+default = true
+name = "account name"
+[account]
+email = "{your}@gmail.com"
+display_name = "{Your}"
+[imap]
+login = "{your}@gmail.com"
+passwd_cmd = "echo {your}"
+```
+
+### Todo
+There is a lot todo. Its in a rough state.
+
+#### UI
+Styleing
+Thread html
+Menus
+Folders fly out
+Setup flow. Skip manual config writing
+
+#### Data
+Active sync
+Cron like sync
+Sync on open
+Thread id generation
+
+#### Features
+Filter and search bar
+Sending...
+Password protected sqlite file.
+Advanced Searching
+Contact view

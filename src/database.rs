@@ -221,10 +221,7 @@ pub fn message_to_db(message: &Email, account: &AccountConfig) -> Option<(RawMes
             html_format,
             parent_id,
             parent_thread_key,
-            sent_date: date_int(
-                // clippy suggestion doesnt look as nice
-                &headers.get("Date").cloned().unwrap_or_default(),
-            ),
+            sent_date: date_int(&headers.get("Date").cloned().unwrap_or_default()),
             ..Default::default()
         };
 
@@ -242,4 +239,20 @@ pub fn message_to_db(message: &Email, account: &AccountConfig) -> Option<(RawMes
 fn date_int(date: &str) -> Option<i64> {
     let sent: Option<DateTime<Utc>> = DateTime::parse_from_rfc2822(date).ok().map(|d| d.into());
     sent.map(|s| s.timestamp())
+}
+#[derive(Default)]
+pub struct MessageFilter {
+    query: Option<String>,
+    pinned: bool,
+    folder: bool,
+    snoozed: bool,
+    archived: bool,
+}
+impl From<&crate::app::ViewFilter> for MessageFilter {
+    fn from(value: &crate::app::ViewFilter) -> Self {
+        MessageFilter {
+            query: value.query.clone(),
+            ..Default::default()
+        }
+    }
 }

@@ -2,7 +2,10 @@
 use clap::Parser;
 use dioxus::prelude::*;
 use dioxus_desktop::{wry, Config, WindowBuilder};
-use std::{cell::Cell, path::PathBuf};
+use std::{
+    cell::Cell,
+    path::{Path, PathBuf},
+};
 use tokio;
 
 use crate::{
@@ -25,6 +28,7 @@ mod sync;
 #[command(bin_name = "cargo")]
 enum Args {
     Sync(SyncArgs),
+    Load(LoadArgs),
     Init(ConfigArgs),
     Run(RunArgs),
     DebugMessage(DebugMessageArgs),
@@ -71,6 +75,19 @@ pub struct ConfigArgs {
 
 #[derive(clap::Args)]
 #[command(author, version, about, long_about = None)]
+pub struct LoadArgs {
+    #[arg(long)]
+    path: PathBuf,
+    #[arg(short)]
+    config_file: Option<PathBuf>,
+    #[arg(short)]
+    database_file: Option<PathBuf>,
+    #[arg(short)]
+    password: Option<String>,
+}
+
+#[derive(clap::Args)]
+#[command(author, version, about, long_about = None)]
 pub struct SyncArgs {
     #[arg(long)]
     count: Option<u32>,
@@ -106,6 +123,24 @@ async fn main() {
                 config::get_database(&args.config_file)
             };
             database::debug_message(&database_config, og)
+        }
+
+        Args::Load(args) => {
+            let database_config = if let Some(database_file) = args.database_file {
+                DatabaseConfig {
+                    path: database_file
+                        .to_str()
+                        .map(|s| s.to_string())
+                        .expect("database path"),
+                    password_used: args.password.is_some(),
+                    password: args.password,
+                }
+            } else {
+                config::get_database(&args.config_file)
+            };
+            sync::load_files(&database_config, &args.path, None)
+                .await
+                .expect("sync");
         }
         Args::Sync(args) => {
             let database_config = if let Some(database_file) = args.database_file {

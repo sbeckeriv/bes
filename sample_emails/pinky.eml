@@ -1,0 +1,24 @@
+From: "Pinky" <pinky@acme.com>
+To: Me Mee <me@example.com> 
+Subject: Are you pondering what I'm pondering?
+Date: Mon, 6 Mar 2023 16:04:02 +0800
+Message-ID: c-4
+MIME-Version: 1.0
+Content-Type: text/html; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
+X-Mailer: PinkyMailer 1.0
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Are you pondering what I'm pondering?</title>
+  </head>
+  <body style="font-family: Arial, sans-serif; background-color: #f2f2f2; padding: 20px;">
+    <div style="text-align: center;">
+      <h1 style="color: #d00;">Zort! Pinky's Email</h1>
+      <p style="font-size: 18px; line-height: 1.5;">Hello there, my dear friend.</p>
+      <p style="font-size: 18px; line-height: 1.5;">Are you pondering what I'm pondering?</p>
+      <p style="font-size: 18px; line-height: 1.5;">I think so, Brain, but how will we get the hippopotamus into the bathtub?</p>
+    </div>
+  </body>
+</html>

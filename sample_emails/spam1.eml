@@ -1,0 +1,34 @@
+From: "Best Deals" <bestdeals@example.com>
+To: Me Mee <me@example.com> 
+Subject: Don't Miss Out on These Amazing Deals!
+Date: Thu, 16 Mar 2023 17:28:05 +0100
+Message-ID: a-3
+MIME-Version: 1.0
+Content-Type: text/html; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
+X-Mailer: PinkyMailer 1.0
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Don't Miss Out on These Amazing Deals!</title>
+  </head>
+  <body style="font-family: Arial, sans-serif; background-color: #f2f2f2; padding: 20px;">
+    <div style="background-color: #ff6600; color: #fff; padding: 20px; text-align: center; margin-bottom: 20px;">
+      <h1>Don't Miss Out on These Amazing Deals!</h1>
+    </div>
+    <div style="font-size: 24px; text-align: center; margin-bottom: 30px;">
+      <p>Dear Valued Customer,</p>
+      <p>We are excited to offer you amazing deals on a wide range of products! From electronics to clothing to home goods, we have everything you need at unbeatable prices.</p>
+      <p>Don't miss out on this limited-time offer. Order now and enjoy huge savings!</p>
+      <p>To take advantage of these deals, simply click the button below:</p>
+    </div>
+    <div style="text-align: center;">
+      <a href="http://example.com" style="display: inline-block; background-color: #008080; color: #fff; padding: 10px 20px; text-decoration: none; font-size: 18px; border-radius: 5px;">Shop Now</a>
+    </div>
+    <div style="font-size: 14px; text-align: center; margin-top: 40px;">
+      <p>Thank you for your business!</p>
+      <p>Best Deals Team</p>
+    </div>
+  </body>
+</html>

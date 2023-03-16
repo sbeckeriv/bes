@@ -1,5 +1,11 @@
+use std::{
+    fs::{self, File},
+    io::Read,
+    path::PathBuf,
+};
+
 use himalaya_lib::{BackendBuilder, Email, Emails};
-use mailparse::{addrparse, body::Body, MailAddr, MailParseError, ParsedMail};
+use mailparse::{addrparse, body::Body, parse_mail, MailAddr, MailParseError, ParsedMail};
 
 use crate::config::AccountConfig;
 #[derive(Debug, Default)]
@@ -12,7 +18,6 @@ pub struct MessageFilter {
 }
 pub fn get_messages(account: &AccountConfig, filter: MessageFilter) -> Emails {
     let (account_config, backend_config) = account.backend_config();
-    dbg!(&account_config, &backend_config);
     let backend = BackendBuilder::new()
         .build(&account_config, &backend_config)
         .unwrap();
@@ -25,12 +30,25 @@ pub fn get_messages(account: &AccountConfig, filter: MessageFilter) -> Emails {
         )
         .unwrap();
     let ids: Vec<_> = x.iter().map(|e| e.id.as_ref()).collect();
-    dbg!(&ids);
 
     let emails = backend
         .get_emails(filter.folder.as_str(), ids)
         .expect("email");
     emails
+}
+
+pub fn load_messages(path: &PathBuf) -> Emails {
+    let paths = fs::read_dir(path).unwrap();
+    let buffs = paths
+        .into_iter()
+        .map(|path| {
+            let mut f = File::open(path.expect("path").path()).expect("file");
+            let mut buffer = Vec::new();
+            f.read_to_end(&mut buffer).expect("file string");
+            buffer
+        })
+        .collect::<Vec<_>>();
+    Emails::from(buffs)
 }
 pub mod email {
     use super::*;

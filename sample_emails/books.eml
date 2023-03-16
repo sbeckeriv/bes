@@ -1,0 +1,51 @@
+From: Book Lover <booklover@example.com>
+Subject: Discover Your Next Favorite Book
+MIME-Version: 1.0
+Content-Type: text/html; charset="UTF-8"
+To: Me Mee <me@example.com> 
+Date: Tue, 7 Mar 2023 16:04:02 -0800
+Message-ID: 6-4
+X-Mailer: PinkyMailer 1.0
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Discover Your Next Favorite Book</title>
+  </head>
+  <body style="font-family: Arial, sans-serif; background-color: #f2f2f2; padding: 20px;">
+    <div style="background-color: #008080; color: #fff; padding: 20px; text-align: center; margin-bottom: 20px;">
+      <h1>Discover Your Next Favorite Book</h1>
+    </div>
+    <div style="font-size: 24px; text-align: center; margin-bottom: 30px;">
+      <p>Dear Book Lover,</p>
+      <p>Are you looking for your next great read? Look no further than our book-selling service!</p>
+    </div>
+    <div style="margin-bottom: 40px; border-bottom: 2px solid #ccc; padding-bottom: 20px;">
+      <img src="https://example.com/book1.jpg" alt="Book 1" width="200" style="float: left; margin-right: 20px;">
+      <div style="overflow: hidden;">
+        <h2 style="font-size: 18px; font-weight: bold; margin-bottom: 10px;">Book Title</h2>
+        <h3 style="font-size: 14px; font-style: italic; margin-bottom: 10px;">Author Name</h3>
+        <p style="font-size: 14px; margin-bottom: 10px;">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed dictum, erat nec mollis gravida, justo lectus lobortis odio, ut auctor metus ipsum sit amet dui.</p>
+        <p style="font-size: 18px; font-weight: bold; color: #ff6600; margin-bottom: 10px;">$19.99</p>
+      </div>
+    </div>
+    <div style="margin-bottom: 40px; border-bottom: 2px solid #ccc; padding-bottom: 20px;">
+      <img src="https://example.com/book2.jpg" alt="Book 2" width="200" style="float: left; margin-right: 20px;">
+      <div style="overflow: hidden;">
+        <h2 style="font-size: 18px; font-weight: bold; margin-bottom: 10px;">Book Title</h2>
+        <h3 style="font-size: 14px; font-style: italic; margin-bottom: 10px;">Author Name</h3>
+        <p style="font-size: 14px; margin-bottom: 10px;">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed dictum, erat nec mollis gravida, justo lectus lobortis odio, ut auctor metus ipsum sit amet dui.</p>
+        <p style="font-size: 18px; font-weight: bold; color: #ff6600; margin-bottom: 10px;">$24.99</p>
+      </div>
+    </div>
+    <div style="text-align: center;">
+      <a href="https://example.com/books" style="display: inline-block; background-color: #ff6600;
+color: #fff; padding: 10px 20px; text-decoration: none; font-size: 18px; border-radius: 5px;">Browse More Books</a>
+</div>
+<div style="font-size: 14px; text-align: center; margin-top: 40px;">
+<p>Thank you for choosing our book-selling service!</p>
+<p>Sincerely,</p>
+<p>The Book Lover Team</p>
+</div>
+  </body>
+</html>

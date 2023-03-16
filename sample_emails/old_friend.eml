@@ -1,0 +1,35 @@
+From: John Smith <john.smith@example.com>
+Subject: A Message From An Old Friend
+MIME-Version: 1.0
+Content-Type: text/html; charset="UTF-8"
+To: Me Mee <me@example.com> 
+Date: Wed, 8 Mar 2023 16:04:02 -0800
+Message-ID: 4-4
+X-Mailer: PinkyMailer 1.0
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>A Message From An Old Friend</title>
+  </head>
+  <body style="font-family: Arial, sans-serif; background-color: #f2f2f2; padding: 20px;">
+    <div style="background-color: #008080; color: #fff; padding: 20px; text-align: center; margin-bottom: 20px;">
+      <h1>A Message From An Old Friend</h1>
+    </div>
+    <div style="font-size: 24px; text-align: center; margin-bottom: 30px;">
+      <p>Dear [Recipient's Name],</p>
+      <p>It's been a long time since we've talked. I hope this email finds you well.</p>
+      <p>I'm not sure if you've heard, but I've been lost at sea for the past several months. It's been a harrowing experience, but I'm happy to say that I've been rescued.</p>
+      <p>During my time adrift, I had a lot of time to reflect on life and what's truly important. And what I realized is that the most important thing in life is the people we surround ourselves with. And you, my friend, have always been one of the most important people in my life.</p>
+      <p>I know we've lost touch over the years, but I hope that we can reconnect and catch up on everything that's happened in our lives. I'd love to hear how you've been and share my experiences with you as well.</p>
+      <p>Please let me know if you're interested in reconnecting. I'd love to hear from you.</p>
+    </div>
+    <div style="text-align: center;">
+      <a href="mailto:john.smith@example.com" style="display: inline-block; background-color: #ff6600; color: #fff; padding: 10px 20px; text-decoration: none; font-size: 18px; border-radius: 5px;">Reply To This Email</a>
+    </div>
+    <div style="font-size: 14px; text-align: center; margin-top: 40px;">
+      <p>Take care,</p>
+      <p>John</p>
+    </div>
+  </body>
+</html>
