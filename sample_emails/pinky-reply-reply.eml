@@ -1,0 +1,24 @@
+To: "Pinky" <pinky@acme.com>
+From: Me Mee <me@example.com> 
+Subject: Re: Are you pondering what I'm pondering?
+Date: Tue, 7 Mar 2023 15:04:02 +0800
+Message-ID: c-6
+In-Reply-To: c-5
+MIME-Version: 1.0
+Content-Type: text/html; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
+X-Mailer: PinkyMailer 1.0
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Re: re: Are you pondering what I'm pondering?</title>
+  </head>
+  <body style="font-family: Arial, sans-serif; background-color: #f2f2f2; padding: 20px;">
+    <div style="text-align: center;">
+      <h1 style="color: #d00;">re: re: Zort! Pinky's Email</h1>
+      <p style="font-size: 18px; line-height: 1.5;">Hello again, my dear friend.</p>
+      <p style="font-size: 18px; line-height: 1.5;">To answer your question, I suggest we use a crane to lift the hippopotamus into the bathtub. What do you think, Brain?</p>
+    </div>
+  </body>
+</html>

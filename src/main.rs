@@ -18,6 +18,7 @@ mod components;
 mod config;
 mod database;
 mod init;
+mod log;
 mod messages;
 mod models;
 mod schema;
@@ -185,6 +186,9 @@ async fn main() {
             use wry::application::window::Icon;
             let bin: &[u8] = std::include_bytes!("icon.bin");
             let icon = Icon::from_rgba(bin.to_vec(), 200, 184).expect("icon");
+            let header = r#"
+            <script src="https://cdn.tailwindcss.com"></script>
+            "#;
             dioxus_desktop::launch_with_props(
                 App,
                 AppProps {
@@ -192,9 +196,9 @@ async fn main() {
                     account_config: Cell::new(Some(account_config)),
                     database_config: Cell::new(Some(database_config)),
                 },
-                Config::default().with_icon(icon).with_custom_head(
-                    "<script src=\"https://cdn.tailwindcss.com\"></script>".to_string(),
-                ),
+                Config::default()
+                    .with_icon(icon)
+                    .with_custom_head(header.to_string()),
             );
         }
     }

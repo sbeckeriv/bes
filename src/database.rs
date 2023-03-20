@@ -1,7 +1,6 @@
 use crate::config::DatabaseConfig;
-use crate::models::Message;
-use crate::models::MessageLite;
-use crate::models::RawMessage;
+use crate::log::log;
+use crate::models::{Message, MessageLite, RawMessage};
 use crate::schema::*;
 use crate::DebugMessageArgs;
 use crate::{
@@ -133,7 +132,11 @@ pub fn save_records(
     Ok(())
 }
 
-pub fn message_to_db(message: &Email, account: &AccountConfig) -> Option<(RawMessage, Message)> {
+pub fn message_to_db(
+    message: &Email,
+    account: &AccountConfig,
+    database_config: &DatabaseConfig,
+) -> Option<(RawMessage, Message)> {
     if let Ok(message) = message.parsed() {
         let headers = message.get_headers();
         let headers = headers
@@ -187,25 +190,7 @@ pub fn message_to_db(message: &Email, account: &AccountConfig) -> Option<(RawMes
 
         let subject = headers.get("Subject").map(|a| a.clone());
         // take parent id and look it up in the db. if there use that thread id.
-        let parent_thread_key = if subject
-            .as_ref()
-            .map(|s| s.to_lowercase().starts_with("re:"))
-            .unwrap_or(false)
-        {
-            subject.as_ref().map(|s| {
-                let mut hasher = Sha256::new();
-                hasher.update(s.replace("re:", ""));
-                let result: String = format!("{:X}", hasher.finalize());
-                result
-            })
-        } else {
-            subject.as_ref().map(|s| {
-                let mut hasher = Sha256::new();
-                hasher.update(s);
-                let result: String = format!("{:X}", hasher.finalize());
-                result
-            })
-        };
+        let parent_thread_key = parent_thread_key(&headers, database_config);
         let record = Message {
             account: account.name.clone(),
             subject,
@@ -256,3 +241,68 @@ impl From<&crate::app::ViewFilter> for MessageFilter {
         }
     }
 }
+
+fn parent_thread_key(
+    headers: &HashMap<String, String>,
+    database_config: &DatabaseConfig,
+) -> Option<String> {
+    let parent_id = headers
+        .get("In-Reply-To")
+        .or_else(|| headers.get("References"))
+        .cloned();
+    if let Some(parent_id) = parent_id {
+        let mut conn = establish_connection(Some((
+            database_config.path.clone().as_str(),
+            &database_config.password.clone(),
+        )));
+
+        match messages::dsl::messages
+            .filter(messages::message_id.eq(&parent_id))
+            .first::<Message>(&mut conn)
+        {
+            Ok(message) => {
+                if message.parent_thread_key.is_some() {
+                    return Some(message.parent_thread_key.unwrap().clone());
+                } else {
+                    log(format!(
+                        "message id {} matching parent id {} does not have a parent_thread_key",
+                        message.message_id, parent_id
+                    ));
+                }
+            }
+            Err(err) => log(format!(
+                "Error matching parent id {}: {:#?}",
+                parent_id, err
+            )),
+        }
+    }
+
+    headers
+        .get("Subject")
+        .map(|a| a.clone())
+        .map(|s| {
+            let s = s.to_lowercase();
+            s.replace("re:", "").trim().to_owned()
+        })
+        .map(|s| {
+            let mut hasher = Sha256::new();
+            hasher.update(s);
+            let result: String = format!("{:X}", hasher.finalize());
+            result
+        })
+}
+/*
+use to fix up threads.
+WITH RECURSIVE CTE AS (
+  SELECT m.id, m.message_id, m.parent_id,CAST(m.id AS varchar) AS path
+  FROM messages m
+  WHERE parent_id is null
+  UNION ALL
+  SELECT m1.id, m1.message_id, m1.parent_id,CAST(m1.id AS varchar) || ',' || path
+  FROM messages m1
+  JOIN CTE ON m1.parent_id = CTE.message_id
+)
+SELECT *
+FROM CTE
+where instr(path, ',') > 0;
+*/

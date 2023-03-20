@@ -34,7 +34,7 @@ pub async fn sync_count(
         );
 
         for message in messages.to_vec().into_iter() {
-            if let Some((raw, record)) = message_to_db(&message, &account) {
+            if let Some((raw, record)) = message_to_db(&message, &account, &database_config) {
                 save_records(database_config, raw, record).map_err(|e| format!("{:?}", e))?;
             }
         }
@@ -62,7 +62,7 @@ pub async fn load_files(
         let messages = messages::load_messages(path);
 
         for message in messages.to_vec().into_iter() {
-            if let Some((raw, record)) = message_to_db(&message, &account) {
+            if let Some((raw, record)) = message_to_db(&message, &account, &database_config) {
                 save_records(database_config, raw, record).map_err(|e| format!("{:?}", e))?;
             }
         }
