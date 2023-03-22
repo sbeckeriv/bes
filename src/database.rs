@@ -8,6 +8,7 @@ use crate::{
     messages::email,
 };
 use chrono::{DateTime, Utc};
+use diesel::dsl::not;
 use diesel::prelude::*;
 use diesel::sqlite::SqliteConnection;
 use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
@@ -62,6 +63,21 @@ pub fn list_threads(database_config: &DatabaseConfig) -> Result<Vec<Message>, St
         database_config.path.clone().as_str(),
         &database_config.password.clone(),
     )));
+
+    let thread_keys = messages::dsl::messages
+        .select(messages::parent_thread_key)
+        .filter(messages::parent_thread_key.is_not_null())
+        .distinct()
+        .order(messages::sent_date.desc())
+        .limit(100)
+        .load::<Option<String>>(&mut conn)
+        .expect("Error loading threads");
+
+    let thread_keys = thread_keys
+        .into_iter()
+        .map(|s| s.unwrap_or_default())
+        .collect::<Vec<_>>();
+
     let messages = messages::dsl::messages
         .select((
             messages::id,
@@ -82,8 +98,8 @@ pub fn list_threads(database_config: &DatabaseConfig) -> Result<Vec<Message>, St
             messages::parent_thread_key,
             messages::sent_date,
         ))
+        .filter(messages::message_id.eq_any(thread_keys))
         .order(messages::sent_date.desc())
-        .limit(100)
         .load::<MessageLite>(&mut conn)
         .expect("Error loading posts");
     Ok(messages.into_iter().map(|m| m.into()).collect())
