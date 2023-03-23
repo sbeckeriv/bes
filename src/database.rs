@@ -114,8 +114,10 @@ pub fn list_threads(database_config: &DatabaseConfig) -> Result<Vec<Vec<Message>
             .and_modify(|vec| vec.push(message.clone()))
             .or_insert(vec![message]);
     });
-    // need to sort here.
-    Ok(messages_group.into_values().collect::<Vec<_>>())
+    // into values is not stable but inner vec is.
+    let mut results = messages_group.into_values().collect::<Vec<_>>();
+    results.sort_by_cached_key(|v| date_int(&v.first().unwrap().sent_at.clone().unwrap()));
+    Ok(results)
 }
 
 // (text, html)

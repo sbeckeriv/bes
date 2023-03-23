@@ -1,16 +1,13 @@
 use crate::{
-    components::{email::Email, utils::*},
+    components::{email::Email, email_thread::EmailThread, utils::*},
     config::{AccountConfig, DatabaseConfig},
     database,
     log::debug_log,
-    messages::parse_emails,
 };
-
-use chrono::{DateTime, Local, Utc};
 use dioxus::prelude::*;
 use dioxus_daisyui::prelude::*;
 use itertools::Itertools;
-use std::{cell::Cell, collections::HashSet, ops::BitXorAssign};
+use std::{cell::Cell, collections::HashSet};
 use tokio::runtime::Handle;
 // filter ideas
 // filter img src urls https://github.com/rust-ammonia/ammonia/issues/175 ?
@@ -190,12 +187,6 @@ struct EmailGroup {
     pub children: Vec<EmailThread>,
 }
 
-#[derive(PartialEq, Clone)]
-struct EmailThread {
-    pub subject: String,
-    pub children: Vec<Email>,
-}
-
 #[inline_props]
 fn EmailGroup(cx: Scope, group: EmailGroup) -> Element {
     let expanded = use_state(&cx, || true);
@@ -224,42 +215,5 @@ fn EmailGroup(cx: Scope, group: EmailGroup) -> Element {
                 })
             }
         }
-    })
-}
-
-#[inline_props]
-fn EmailThread(cx: Scope, thread: EmailThread) -> Element {
-    let icon = thread
-        .children
-        .first()
-        .and_then(|c| c.from.chars().nth(0))
-        .unwrap_or_default();
-    dbg!(thread.children.len());
-    cx.render(rsx! {
-        if thread.children.len()>1{
-            rsx!(
-            div {
-                class: "email-thread-detail",
-                div{
-                    class: "email-thread-icon circle",
-                    "{icon}"
-                }
-
-                div {
-                    for email in thread.children.to_owned().into_iter(){
-                        div{
-                            class: "email-list",
-                            Email{ email: email }
-                        }
-                    }
-                }
-        })
-        }else{
-            rsx!(div{
-                class: "email-list",
-                Email{ email: thread.children.first().unwrap().to_owned()}
-            })
-        }
-
     })
 }
