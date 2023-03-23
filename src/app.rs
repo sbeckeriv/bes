@@ -2,6 +2,7 @@ use crate::{
     components::{email::Email, utils::*},
     config::{AccountConfig, DatabaseConfig},
     database,
+    log::debug_log,
     messages::parse_emails,
 };
 
@@ -123,33 +124,37 @@ async fn EmailContent(
     use_shared_state_provider(cx, || AccountConfigState(account_config.clone()));
     use_shared_state_provider(cx, || DatabaseConfigState(database_config.clone()));
 
-    let mut view_filter_state = use_shared_state::<ViewFilterState>(cx).unwrap();
+    let view_filter_state = use_shared_state::<ViewFilterState>(cx).unwrap();
     let view_filter = &view_filter_state.read().0;
     let groups = database::list_threads(&database_config).unwrap_or_default();
-
+    debug_log(groups.len());
     let mut list = vec![];
     for (key, group) in &groups
         .into_iter()
-        .group_by(|e| date_group(&e.sent_at.clone().unwrap_or_default()))
+        .group_by(|e| date_group(&e.first().unwrap().sent_at.clone().unwrap_or_default()))
     {
+        debug_log(&key);
         let threads = group
             .into_iter()
             .map(|e| EmailThread {
-                subject: e.subject.clone().unwrap_or_default(),
-                children: vec![Email {
-                    message_id: e.message_id,
-                    subject: e.subject.unwrap_or_default(),
-                    from: e.message_from.unwrap_or_default(),
-                    to: e.message_to.unwrap_or_default(),
-                    cc: e.message_cc.unwrap_or_default(),
-                    bcc: e.message_bcc.unwrap_or_default(),
-                    html_format: e.html_format.unwrap_or_default(),
-                    text_format: e.text_format.unwrap_or_default(),
-                    date_sent: e.sent_at.unwrap_or_default(),
-                    done: e.done_at.map(|_| true).unwrap_or(false),
-                    pinned: e.pinned_at.map(|_| true).unwrap_or(false),
-                    reminder_at: e.reminder_at.unwrap_or_default(),
-                }],
+                subject: e.first().unwrap().subject.clone().unwrap_or_default(),
+                children: e
+                    .into_iter()
+                    .map(|message| Email {
+                        message_id: message.message_id,
+                        subject: message.subject.unwrap_or_default(),
+                        from: message.message_from.unwrap_or_default(),
+                        to: message.message_to.unwrap_or_default(),
+                        cc: message.message_cc.unwrap_or_default(),
+                        bcc: message.message_bcc.unwrap_or_default(),
+                        html_format: message.html_format.unwrap_or_default(),
+                        text_format: message.text_format.unwrap_or_default(),
+                        date_sent: message.sent_at.unwrap_or_default(),
+                        done: message.done_at.map(|_| true).unwrap_or(false),
+                        pinned: message.pinned_at.map(|_| true).unwrap_or(false),
+                        reminder_at: message.reminder_at.unwrap_or_default(),
+                    })
+                    .collect::<Vec<_>>(),
             })
             .collect::<Vec<_>>();
         list.push(EmailGroup {
@@ -229,6 +234,7 @@ fn EmailThread(cx: Scope, thread: EmailThread) -> Element {
         .first()
         .and_then(|c| c.from.chars().nth(0))
         .unwrap_or_default();
+    dbg!(thread.children.len());
     cx.render(rsx! {
         if thread.children.len()>1{
             rsx!(

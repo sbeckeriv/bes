@@ -6,7 +6,7 @@ use crate::schema::*;
 
 use diesel::{Insertable, Queryable, QueryableByName};
 
-#[derive(Queryable, Debug, Default, PartialEq, QueryableByName)]
+#[derive(Queryable, Debug, Default, PartialEq, QueryableByName, Clone)]
 #[diesel(table_name = messages)]
 pub struct MessageLite {
     pub id: Option<i32>,
@@ -52,7 +52,7 @@ impl From<MessageLite> for Message {
         }
     }
 }
-#[derive(Queryable, Debug, Default, PartialEq, Insertable)]
+#[derive(Queryable, Debug, Default, PartialEq, Insertable, Clone)]
 pub struct Message {
     pub id: Option<i32>,
     pub message_id: String,
