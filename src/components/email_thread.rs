@@ -120,7 +120,7 @@ pub fn EmailThread(cx: Scope, thread: EmailThread) -> Element {
                                 class: class!(ml_2 w_full border_t border_t_gray_200 bg_white),
                                     div{
                                         class: "email-list",
-                                        Email{ email: thread.children.first().cloned().unwrap(), start_expanded: false}
+                                        Email{ email: thread.children.last().cloned().unwrap(), start_expanded: false}
 
 
                                     }
@@ -136,7 +136,7 @@ pub fn EmailThread(cx: Scope, thread: EmailThread) -> Element {
 
                                     div{
                                         class: "email-list",
-                                        Email{ email: thread.children.last().cloned().unwrap(), start_expanded: false}
+                                        Email{ email: thread.children.first().cloned().unwrap(), start_expanded: false}
                                     }
                             })
                         }

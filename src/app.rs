@@ -206,7 +206,7 @@ fn EmailGroup(cx: Scope, group: EmailGroup) -> Element {
             if *expanded.get(){
                 rsx!(div {
                     class: class!(flex flex_col),
-                    for email_thread in group.children.to_owned().into_iter(){
+                    for email_thread in group.children.to_owned().into_iter().rev(){
                         div{
                             class: "email-thread",
                             EmailThread{ thread: email_thread}
