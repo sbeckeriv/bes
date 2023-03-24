@@ -8,8 +8,9 @@ use crate::{
     messages::email,
 };
 use chrono::{DateTime, Utc};
-use diesel::prelude::*;
-use diesel::sqlite::SqliteConnection;
+use diesel::dsl::not;
+use diesel::sqlite::{Sqlite, SqliteConnection};
+use diesel::{debug_query, prelude::*};
 use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
 use himalaya_lib::Email;
 use mailparse::parse_mail;
@@ -57,12 +58,28 @@ pub fn debug_message(database_config: &DatabaseConfig, args: DebugMessageArgs) {
     dbg!(&parsed.get_headers(), &parsed.get_body(),);
 }
 
-pub fn list_threads(database_config: &DatabaseConfig) -> Result<Vec<Message>, String> {
+pub fn list_threads(database_config: &DatabaseConfig) -> Result<Vec<Vec<Message>>, String> {
     let mut conn = establish_connection(Some((
         database_config.path.clone().as_str(),
         &database_config.password.clone(),
     )));
-    let messages = messages::dsl::messages
+
+    let thread_keys = messages::dsl::messages
+        .select(messages::parent_thread_key)
+        .filter(messages::parent_thread_key.is_not_null())
+        .distinct()
+        .order(messages::sent_date.desc())
+        .limit(100)
+        .load::<Option<String>>(&mut conn)
+        .expect("Error loading threads");
+
+    let thread_keys = thread_keys
+        .into_iter()
+        .map(|s| s.unwrap_or_default())
+        .collect::<Vec<_>>();
+    dbg!(&thread_keys);
+
+    let query = messages::dsl::messages
         .select((
             messages::id,
             messages::message_id,
@@ -82,11 +99,25 @@ pub fn list_threads(database_config: &DatabaseConfig) -> Result<Vec<Message>, St
             messages::parent_thread_key,
             messages::sent_date,
         ))
-        .order(messages::sent_date.desc())
-        .limit(100)
+        .filter(messages::parent_thread_key.eq_any(thread_keys))
+        .order(messages::sent_date.desc());
+    let debug = debug_query::<Sqlite, _>(&query);
+    let messages = query
         .load::<MessageLite>(&mut conn)
         .expect("Error loading posts");
-    Ok(messages.into_iter().map(|m| m.into()).collect())
+
+    let mut messages_group: HashMap<String, Vec<Message>> = HashMap::new();
+    messages.into_iter().for_each(|message| {
+        let message: Message = message.into();
+        messages_group
+            .entry(message.parent_thread_key.clone().unwrap_or_default())
+            .and_modify(|vec| vec.push(message.clone()))
+            .or_insert(vec![message]);
+    });
+    // into values is not stable but inner vec is.
+    let mut results = messages_group.into_values().collect::<Vec<_>>();
+    results.sort_by_cached_key(|v| date_int(&v.first().unwrap().sent_at.clone().unwrap()));
+    Ok(results)
 }
 
 // (text, html)

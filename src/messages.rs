@@ -65,6 +65,7 @@ pub mod email {
         }
     }
 }
+//(email, name)
 pub fn parse_emails(emails: &str) -> Vec<(String, Option<String>)> {
     let list = addrparse(emails)
         .ok()

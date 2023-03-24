@@ -19,12 +19,12 @@ pub struct Email {
     pub pinned: bool,
     pub reminder_at: String,
 }
-
+// share click state and make subject its own thing.
 #[inline_props]
-pub fn Email(cx: Scope, email: Email) -> Element {
+pub fn Email(cx: Scope, email: Email, start_expanded: bool) -> Element {
     let database_config = use_shared_state::<DatabaseConfigState>(cx).unwrap();
     let database_config = &database_config.read().0;
-    let expanded = use_state(&cx, || false);
+    let expanded = use_state(&cx, || start_expanded.clone());
     let hovered = use_state(&cx, || false);
     let background_hover = if *hovered.get() {
         "background-color: #ddd;"
@@ -67,7 +67,7 @@ pub fn Email(cx: Scope, email: Email) -> Element {
                 key: "{email.message_id}",
                 class: class!(w_full),
                 div {
-                    class: class!(flex gap_20 bg_gray_500),
+                    class: class!(flex gap_20 bg_gray_100),
                     div{
                         class: class!(flex gap_16 grow),
                         onclick:  move |_| {
