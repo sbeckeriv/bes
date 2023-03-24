@@ -17,6 +17,7 @@ pub fn EmailThread(cx: Scope, thread: EmailThread) -> Element {
     cx.render(rsx! {
         if thread.children.len()>1{
             let expanded = use_state(&cx, || false);
+            let expanded_list = use_state(&cx, || false);
             let raw_from = thread.children.first().as_ref().map(|e| e.from.clone()).unwrap_or_default();
             let from = parse_emails(&raw_from)
                 .first()
@@ -81,10 +82,11 @@ pub fn EmailThread(cx: Scope, thread: EmailThread) -> Element {
                 rsx!(
                     div {
                         class: class!(w_full border_t border_t_gray_200 bg_blue_100 ),
+                        div{
+
                         onclick:  move |_| {
                             expanded.set(expanded.get()^true);
                         },
-
                         div{
                             class: class!(w_3__12 overflow_hidden text_ellipsis whitespace_nowrap),
                             "{from} ({thread.children.len()})"
@@ -95,19 +97,51 @@ pub fn EmailThread(cx: Scope, thread: EmailThread) -> Element {
                             class: class!(w_full grow overflow_hidden text_ellipsis whitespace_nowrap),
                             "{thread.children.first().unwrap().subject}"
                         }
-                        // its own line bumped in
-                        div {
-                            class: "email-expaned-list",
-                            class: class!(ml_2 w_full border_t border_t_gray_200 bg_white),
-                            for (i,email) in thread.children.to_owned().into_iter().rev().enumerate(){
 
-                                div{
-                                    class: "email-list",
-                                    Email{ email: email, start_expanded: i==end-1}
+                        },
+                        // its own line bumped in
+                        if *expanded_list.get() || thread.children.len()==2{
+                        rsx!(div {
+                            class: "email-expaned-list",
+                                class: class!(ml_2 w_full border_t border_t_gray_200 bg_white),
+                                for (i,email) in thread.children.to_owned().into_iter().rev().enumerate(){
+
+                                    div{
+                                        class: "email-list",
+                                        Email{ email: email, start_expanded: i==end-1}
+                                    }
                                 }
+                            })
                             }
+                        else{
+
+                            rsx!(div {
+                                class: "email-thread-short-list",
+                                class: class!(ml_2 w_full border_t border_t_gray_200 bg_white),
+                                    div{
+                                        class: "email-list",
+                                        Email{ email: thread.children.first().cloned().unwrap(), start_expanded: false}
+
+
+                                    }
+
+                                    div{
+                                        class: "email-list",
+                                        onclick:  move |_| {
+                                            expanded_list.set(expanded_list.get()^true);
+                                        },
+                                        "{thread.children.len()-2} more"
+
+                                    }
+
+                                    div{
+                                        class: "email-list",
+                                        Email{ email: thread.children.last().cloned().unwrap(), start_expanded: false}
+                                    }
+                            })
                         }
                     }
+
                 )
             }
         }else{
