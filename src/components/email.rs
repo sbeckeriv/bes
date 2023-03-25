@@ -25,13 +25,6 @@ pub fn Email(cx: Scope, email: Email, start_expanded: bool) -> Element {
     let database_config = use_shared_state::<DatabaseConfigState>(cx).unwrap();
     let database_config = &database_config.read().0;
     let expanded = use_state(&cx, || start_expanded.clone());
-    let hovered = use_state(&cx, || false);
-    let background_hover = if *hovered.get() {
-        "background-color: #ddd;"
-    } else {
-        ""
-    };
-
     let from = parse_emails(&email.from)
         .first()
         .map(|f| f.1.clone().unwrap_or_else(|| f.0.clone()))
@@ -72,8 +65,6 @@ pub fn Email(cx: Scope, email: Email, start_expanded: bool) -> Element {
                         class: class!(flex gap_16 grow),
                         onclick:  move |_| {
                             expanded.set(false);
-                            //you clicked it you should be hovering over it!
-                            hovered.set(true);
                         },
                         div{
                             class: "email-expanded-user-icon circle",
@@ -116,11 +107,7 @@ pub fn Email(cx: Scope, email: Email, start_expanded: bool) -> Element {
             }
         })
     } else {
-        let date = if *hovered.get() {
-            relative_date_format(&email.date_sent)
-        } else {
-            "".into()
-        };
+        let date = relative_date_format(&email.date_sent);
         let mut from = from;
         from.truncate(30);
 
@@ -128,13 +115,11 @@ pub fn Email(cx: Scope, email: Email, start_expanded: bool) -> Element {
             div {
                 class: class!(w_full border_t border_t_gray_200 ),
                 div {
+                    class: "parent_hover",
                     // class: class!() "email-expaned-header flex gap-20",
-                    onmouseenter: move |_| {hovered.set(true)},
-                    onmouseleave: move |_| {hovered.set(false)},
                     div{
                         class: class!(flex justify_between px_3 py_2 grow gap_5 hover(bg_slate_200)),
                         onclick:  move |_| {
-                            hovered.set(false);
                             expanded.set(true);
                         },
                         div{
@@ -147,13 +132,12 @@ pub fn Email(cx: Scope, email: Email, start_expanded: bool) -> Element {
                         }
 
                         div{
-                            class: "email-expaned-subject",
                             class: class!(w_full grow overflow_hidden text_ellipsis whitespace_nowrap),
                             "{email.subject}"
                         }
 
                         div{
-                            class: class!(w_2__12 text_right overflow_hidden whitespace_nowrap),
+                            class: class!("hide" w_2__12 text_right overflow_hidden whitespace_nowrap),
                             "{date}"
                         }
 

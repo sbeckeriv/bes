@@ -13,7 +13,6 @@ pub struct EmailThread {
 }
 #[inline_props]
 pub fn EmailThread(cx: Scope, thread: EmailThread) -> Element {
-    let hovered = use_state(&cx, || false);
     cx.render(rsx! {
         if thread.children.len()>1{
             let expanded = use_state(&cx, || false);
@@ -27,11 +26,7 @@ pub fn EmailThread(cx: Scope, thread: EmailThread) -> Element {
             let icon = from.chars().nth(0).unwrap_or_default();
 
             if !*expanded.get(){
-                let date = if *hovered.get() {
-                    relative_date_format(&thread.children.first().unwrap().date_sent)
-                } else {
-                    "".into()
-                };
+                let date = relative_date_format(&thread.children.first().unwrap().date_sent);
                 let mut from = from;
                 from.truncate(30);
 
@@ -40,13 +35,10 @@ pub fn EmailThread(cx: Scope, thread: EmailThread) -> Element {
                         class: class!(w_full border_t border_t_gray_200 ),
                         key: "thread-{thread.children.first().unwrap().message_id}",
                         div {
-                            // class: class!() "email-expaned-header flex gap-20",
-                            onmouseenter: move |_| {hovered.set(true)},
-                            onmouseleave: move |_| {hovered.set(false)},
+                            class: "parent_hover",
                             div{
                                 class: class!(flex justify_between px_3 py_2 grow gap_5 hover(bg_slate_200)),
                                 onclick:  move |_| {
-                                    hovered.set(false);
                                     expanded.set(true);
                                 },
                                 div{
@@ -65,7 +57,7 @@ pub fn EmailThread(cx: Scope, thread: EmailThread) -> Element {
                                 }
 
                                 div{
-                                    class: class!(w_2__12 text_right overflow_hidden whitespace_nowrap),
+                                    class: class!("hide" w_2__12 text_right overflow_hidden whitespace_nowrap),
                                     "{date}"
                                 }
 
@@ -127,6 +119,7 @@ pub fn EmailThread(cx: Scope, thread: EmailThread) -> Element {
 
                                     div{
                                         class: "email-list",
+                                        class: class!(border_b border_b_gray_200 border_t border_t_gray_200 bg_white),
                                         onclick:  move |_| {
                                             expanded_list.set(expanded_list.get()^true);
                                         },

@@ -188,6 +188,19 @@ async fn main() {
             let icon = Icon::from_rgba(bin.to_vec(), 200, 184).expect("icon");
             let header = r#"
             <script src="https://cdn.tailwindcss.com"></script>
+            <style>
+                .hide {
+                    visibility: hidden;
+                }
+
+                .parent_hover:hover > .hide {
+                    visibility: visible;
+                } 
+
+                .parent_hover:hover > div> .hide {
+                    visibility: visible;
+                } 
+            </style>
             "#;
             dioxus_desktop::launch_with_props(
                 App,
