@@ -1,5 +1,5 @@
 use crate::config::DatabaseConfig;
-use crate::log::log;
+use crate::log::{debug_log, log};
 use crate::models::{Message, MessageLite, RawMessage};
 use crate::schema::*;
 use crate::DebugMessageArgs;
@@ -9,6 +9,7 @@ use crate::{
 };
 use chrono::{DateTime, Utc};
 use diesel::dsl::not;
+use diesel::query_dsl::methods::BoxedDsl;
 use diesel::sqlite::{Sqlite, SqliteConnection};
 use diesel::{debug_query, prelude::*};
 use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
@@ -58,18 +59,36 @@ pub fn debug_message(database_config: &DatabaseConfig, args: DebugMessageArgs) {
     dbg!(&parsed.get_headers(), &parsed.get_body(),);
 }
 
-pub fn list_threads(database_config: &DatabaseConfig) -> Result<Vec<Vec<Message>>, String> {
+pub fn list_threads(
+    database_config: &DatabaseConfig,
+    filter: MessageFilter,
+) -> Result<Vec<Vec<Message>>, String> {
     let mut conn = establish_connection(Some((
         database_config.path.clone().as_str(),
         &database_config.password.clone(),
     )));
 
-    let thread_keys = messages::dsl::messages
+    let mut query = messages::table.into_boxed();
+    if let Some(q) = filter.query {
+        let q = format!("%{q}%");
+        query = query
+            .filter(messages::content.like(q.to_owned()))
+            .or_filter(messages::subject.like(q.to_owned()))
+            .or_filter(messages::message_to.like(q.to_owned()))
+            .or_filter(messages::message_cc.like(q.to_owned()))
+            .or_filter(messages::message_from.like(q.to_owned()));
+    } else {
+        query = query.filter(messages::parent_thread_key.is_not_null())
+    }
+    let query = query
         .select(messages::parent_thread_key)
-        .filter(messages::parent_thread_key.is_not_null())
         .distinct()
         .order(messages::sent_date.desc())
-        .limit(100)
+        .limit(100);
+
+    let debug = debug_query::<Sqlite, _>(&query);
+    debug_log(debug);
+    let thread_keys = query
         .load::<Option<String>>(&mut conn)
         .expect("Error loading threads");
 
@@ -79,7 +98,8 @@ pub fn list_threads(database_config: &DatabaseConfig) -> Result<Vec<Vec<Message>
         .collect::<Vec<_>>();
     dbg!(&thread_keys);
 
-    let query = messages::dsl::messages
+    let query = messages::table.into_boxed();
+    let query = query
         .select((
             messages::id,
             messages::message_id,
@@ -102,6 +122,7 @@ pub fn list_threads(database_config: &DatabaseConfig) -> Result<Vec<Vec<Message>
         .filter(messages::parent_thread_key.eq_any(thread_keys))
         .order(messages::sent_date.desc());
     let debug = debug_query::<Sqlite, _>(&query);
+    debug_log(debug);
     let messages = query
         .load::<MessageLite>(&mut conn)
         .expect("Error loading posts");

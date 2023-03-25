@@ -33,8 +33,8 @@ pub fn App(cx: Scope<AppProps>) -> Element {
         (Some(filter), Some(account_config), Some(database_config)) => {
             use_shared_state_provider(cx, || ViewFilterState(filter.clone()));
             cx.render(rsx! { EmailContent {
-            account_config: account_config.clone(), filter: filter.clone(), database_config: database_config.clone()
-        }})
+                account_config: account_config.clone(), database_config: database_config.clone()
+            }})
         }
         (_, _, _) => {
             cx.render(rsx! {
@@ -115,7 +115,6 @@ pub struct ViewFilterState(pub ViewFilter);
 async fn EmailContent(
     cx: Scope,
     account_config: AccountConfig,
-    filter: ViewFilter,
     database_config: DatabaseConfig,
 ) -> Element {
     use_shared_state_provider(cx, || AccountConfigState(account_config.clone()));
@@ -123,14 +122,13 @@ async fn EmailContent(
 
     let view_filter_state = use_shared_state::<ViewFilterState>(cx).unwrap();
     let view_filter = &view_filter_state.read().0;
-    let groups = database::list_threads(&database_config).unwrap_or_default();
+    let groups = database::list_threads(&database_config, view_filter.into()).unwrap_or_default();
     debug_log(groups.len());
     let mut list = vec![];
     for (key, group) in &groups
         .into_iter()
         .group_by(|e| date_group(&e.first().unwrap().sent_at.clone().unwrap_or_default()))
     {
-        debug_log(&key);
         let threads = group
             .into_iter()
             .map(|e| EmailThread {
