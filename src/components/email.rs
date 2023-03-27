@@ -60,14 +60,14 @@ pub fn Email(cx: Scope, email: Email, start_expanded: bool) -> Element {
                 key: "{email.message_id}",
                 class: class!(w_full),
                 div {
-                    class: class!(flex gap_20 bg_gray_100),
+                    class: class!(flex justify_between px_3 py_2 grow gap_5 ),
                     div{
                         class: class!(flex gap_16 grow),
                         onclick:  move |_| {
                             expanded.set(false);
                         },
                         div{
-                            class: "email-expanded-user-icon circle",
+                            class: class!( h_5 w_5 font_bold text_gray_700 rounded_full bg_sky_600 flex items_center justify_center ),
                             "{icon}"
                         }
                         div{
@@ -123,7 +123,7 @@ pub fn Email(cx: Scope, email: Email, start_expanded: bool) -> Element {
                             expanded.set(true);
                         },
                         div{
-                            style: "width: 32px;",
+                            class: class!( h_5 w_7 font_bold text_gray_700 rounded_full bg_sky_600 flex items_center justify_center ),
                             "{icon}"
                         }
                         div{

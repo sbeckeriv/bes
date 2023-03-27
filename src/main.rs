@@ -187,7 +187,9 @@ async fn main() {
             let bin: &[u8] = std::include_bytes!("icon.bin");
             let icon = Icon::from_rgba(bin.to_vec(), 200, 184).expect("icon");
             let header = r#"
-            <script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+
+
             <style>
                 .hide {
                     visibility: hidden;
@@ -202,6 +204,7 @@ async fn main() {
                 } 
             </style>
             "#;
+            let window = WindowBuilder::new().with_title("Becker's Email System");
             dioxus_desktop::launch_with_props(
                 App,
                 AppProps {
@@ -210,6 +213,7 @@ async fn main() {
                     database_config: Cell::new(Some(database_config)),
                 },
                 Config::default()
+                    .with_window(window)
                     .with_icon(icon)
                     .with_custom_head(header.to_string()),
             );

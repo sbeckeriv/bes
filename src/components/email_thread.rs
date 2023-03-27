@@ -42,7 +42,7 @@ pub fn EmailThread(cx: Scope, thread: EmailThread) -> Element {
                                     expanded.set(true);
                                 },
                                 div{
-                                    style: "width: 32px;",
+                                    class: class!( h_5 w_5 font_bold text_gray_700 rounded_full bg_sky_600 flex items_center justify_center ),
                                     "{icon}"
                                 }
                                 div{
@@ -118,13 +118,15 @@ pub fn EmailThread(cx: Scope, thread: EmailThread) -> Element {
                                     }
 
                                     div{
-                                        class: "email-list",
                                         class: class!(border_b border_b_gray_200 border_t border_t_gray_200 bg_white),
+
                                         onclick:  move |_| {
                                             expanded_list.set(expanded_list.get()^true);
                                         },
-                                        "{thread.children.len()-2} more"
-
+                                        div{
+                                            class: class!( h_7 w_7 font_bold text_gray_700 rounded_full bg_sky_600 flex items_center justify_center ),
+                                            "{thread.children.len()-2}"
+                                        }
                                     }
 
                                     div{
